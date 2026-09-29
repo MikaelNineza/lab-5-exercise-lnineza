@@ -43,10 +43,26 @@ Point2D getSlope(const std::vector<sf::Vector2f>& pts, float t) {
     return Point2D(x, y);
 }
 
+int getClosestPoint(const std::vector<sf::Vector2f>& pts, sf::Vector2i mouse) {
+    int closestIdx = 0;
+    float minDist = 100000.f;
+
+    for (int i = 0; i < pts.size(); ++i) {
+        float distance = std::pow(pts[i].x - mouse.x, 2) + std::pow(pts[i].y - mouse.y, 2);
+        if (distance < minDist) {
+            minDist = distance;
+            closestIdx = i;
+        }
+    }
+
+    return closestIdx;
+}
+
 // TODO: (Part 1) Store four control points for the curve.
-const std::vector<Point2D> points = {{100.0F, 500.0F}, {200.0F, 100.0F}, {550.0F, 150.0F}, {650.0F, 550.0F}};
+std::vector<Point2D> points = {{100.0F, 500.0F}, {200.0F, 100.0F}, {550.0F, 150.0F}, {650.0F, 550.0F}};
 // TODO: (Part 2) Track animation time for the square moving along the curve.
 // TODO: (Part 3) Track the index of the control point being dragged.
+int pointIdx = -1;
 
 void handleInput(sf::Window& window, bool& shouldQuit) {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
@@ -56,10 +72,18 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
         } else if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
             // TODO: (Part 3) On left-click, select the closest control point
             // using mouse->position and start dragging it.
+            if (mouse->button == sf::Mouse::Button::Left) {
+                pointIdx = getClosestPoint(points, mouse->position);
+                points[pointIdx] = {static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y)};
+            }
         } else if (const auto* mouse = event->getIf<sf::Event::MouseButtonReleased>()) {
             // TODO: (Part 3) On left-button release, stop dragging.
+            pointIdx = -1;
         } else if (const auto* mouse = event->getIf<sf::Event::MouseMoved>()) {
             // TODO: (Part 3) Move the selected control point to mouse->position.
+            if (pointIdx != -1) {
+                points[pointIdx] = {static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y)};
+            }
             // TODO: (Part 4) Maintain matching slopes at shared endpoints.
             // When moving point 3, move point 5 without changing its distance
             // from point 4 (point numbers here start at 1).
@@ -116,6 +140,21 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 3) Draw control handles from point 1 to 2 and point 3 to 4.
     // TODO: (Part 4) Draw all connected cubic Bezier segments and their handles.
     // ====== ====== ======
+
+    // https://www.sfml-dev.org/tutorials/3.0/graphics/shape/#lines
+    std::array line1 =
+    {
+        sf::Vertex{points[0]},
+        sf::Vertex{points[1]}
+    };
+    std::array line2 =
+    {
+        sf::Vertex{points[2]},
+        sf::Vertex{points[3]}
+    };
+
+    window.draw(line1.data(), line1.size(), sf::PrimitiveType::Lines);
+    window.draw(line2.data(), line1.size(), sf::PrimitiveType::Lines);
 
     // ====== ====== ======
     // TODO: (Bonus) Support multiple curves, a Galaga screen overlay at a 1:2 ratio, and exporting
