@@ -76,12 +76,14 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 1) Sample GetPoint over t in [0, 1] and connect samples using the line-drawing
     // code from your project. Draw all four control points as circles after drawing the curve.
     // ====== ====== ======
-    const int sampleSize = 30;
-    
+    static float time(0);
+    const float t2 = time / (FPS_LIMIT);
+    if (time >= FPS_LIMIT) time = 0;
+
     float t = 0;
-    sf::VertexArray line(sf::PrimitiveType::LineStrip, sampleSize + 1);
-    for (int i = 0; i <= sampleSize; ++i) {
-        t = static_cast<float>(i) / sampleSize;
+    sf::VertexArray line(sf::PrimitiveType::LineStrip, FPS_LIMIT + 1);
+    for (int i = 0; i <= FPS_LIMIT; ++i) {
+        t = static_cast<float>(i) / FPS_LIMIT;
         line[i].position = getPoint(points, t);
         line[i].color = sf::Color::Blue;
     }
@@ -99,6 +101,16 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 2) Draw a small square moving repeatedly along the curve.
     // Use GetSlope to orient it to the curve at each time step.
     // ====== ====== ======
+    Point2D position = getPoint(points, t2);
+    Point2D slope = getSlope(points, t2);
+
+    sf::RectangleShape square({10.f, 10.f});
+    square.setOrigin({10.f, 10.f});
+    // https://www.sfml-dev.org/tutorials/3.0/graphics/transform/#rotation
+    square.setRotation(sf::radians(std::atan2(slope.y, slope.x)));
+    square.setPosition(position);
+    square.setFillColor(sf::Color::Green);
+    window.draw(square);
 
     // ====== ====== ======
     // TODO: (Part 3) Draw control handles from point 1 to 2 and point 3 to 4.
@@ -109,7 +121,7 @@ void render(sf::RenderWindow& window) {
     // TODO: (Bonus) Support multiple curves, a Galaga screen overlay at a 1:2 ratio, and exporting
     // curve points as C++ code for Project 1b.
     // ====== ====== ======
-
+    time++;
     window.display();
 }
 
