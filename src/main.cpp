@@ -11,10 +11,22 @@ const int FPS_LIMIT = 30;
 using Point2D = sf::Vector2f;
 
 // TODO: (Part 1) Define a function that samples a cubic Bezier curve at t in [0, 1].
-Point2D getPoint(const std::vector<sf::Vector2f>& pts, float t) { return Point2D{}; }
+Point2D getPoint(const std::vector<sf::Vector2f>& pts, float t) {
+}
 
 // TODO: (Part 2) Define a function that returns the curve's slope at t in [0, 1].
-Point2D getSlope(const std::vector<sf::Vector2f>& pts, float t) { return Point2D{}; }
+Point2D getSlope(const std::vector<sf::Vector2f>& pts, float t) {
+    assert(pts.size() >= 4);
+    auto p1 = pts[0];
+    auto p2 = pts[1];
+    auto p3 = pts[2];
+    auto p4 = pts[3];
+
+    auto x = 3*std::pow(1 - t, 2) * (p2.x - p1.x) + 6*(1 - t)*t * (p3.x - p2.x) + 3*std::pow(t, 2) * (p4.x - p3.x);
+    auto y = 3*std::pow(1 - t, 2) * (p2.y - p1.y) + 6*(1 - t)*t * (p3.y - p2.y) + 3*std::pow(t, 2) * (p4.y - p3.y);
+
+    return Point2D(x, y);
+}
 
 // TODO: (Part 1) Store four control points for the curve.
 // TODO: (Part 2) Track animation time for the square moving along the curve.
