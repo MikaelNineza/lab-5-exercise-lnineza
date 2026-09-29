@@ -12,6 +12,21 @@ using Point2D = sf::Vector2f;
 
 // TODO: (Part 1) Define a function that samples a cubic Bezier curve at t in [0, 1].
 Point2D getPoint(const std::vector<sf::Vector2f>& pts, float t) {
+    static std::vector<Point2D> tmp;
+    assert(pts.size() > 1);
+    tmp.clear();
+    for (int x = 0; x < pts.size()-1; x++) {
+        tmp.push_back(pts[x]*(1.0f-t) + pts[x+1]*t);
+    }
+    
+    while (tmp.size() > 1)
+    {
+        for (int x = 0; x < tmp.size()-1; x++) {
+            tmp[x] = tmp[x]*(1.0f-t) + tmp[x+1]*t;
+        }
+        tmp.pop_back();
+    }
+    return tmp[0];
 }
 
 // TODO: (Part 2) Define a function that returns the curve's slope at t in [0, 1].
@@ -29,6 +44,7 @@ Point2D getSlope(const std::vector<sf::Vector2f>& pts, float t) {
 }
 
 // TODO: (Part 1) Store four control points for the curve.
+const std::vector<Point2D> points = {{100.0F, 500.0F}, {200.0F, 100.0F}, {550.0F, 150.0F}, {650.0F, 550.0F}};
 // TODO: (Part 2) Track animation time for the square moving along the curve.
 // TODO: (Part 3) Track the index of the control point being dragged.
 
@@ -60,6 +76,24 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 1) Sample GetPoint over t in [0, 1] and connect samples using the line-drawing
     // code from your project. Draw all four control points as circles after drawing the curve.
     // ====== ====== ======
+    const int sampleSize = 30;
+    
+    float t = 0;
+    sf::VertexArray line(sf::PrimitiveType::LineStrip, sampleSize + 1);
+    for (int i = 0; i <= sampleSize; ++i) {
+        t = static_cast<float>(i) / sampleSize;
+        line[i].position = getPoint(points, t);
+        line[i].color = sf::Color::Blue;
+    }
+    window.draw(line);
+
+    for (int i = 0; i < points.size(); ++i) {
+        sf::CircleShape circle(10.f);
+        circle.setOrigin({10.f, 10.f});
+        circle.setPosition(points[i]);
+        circle.setFillColor(sf::Color::Red);
+        window.draw(circle);
+    }
 
     // ====== ====== ======
     // TODO: (Part 2) Draw a small square moving repeatedly along the curve.
