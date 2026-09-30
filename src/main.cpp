@@ -95,6 +95,7 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
                 Point2D endPoint = points[len - 1];
                 Point2D direction = endPoint - points[len - 2];
 
+                //direction with length of 1
                 direction /= direction.length();
 
                 Point2D new1 = endPoint + direction * 25.f;
@@ -104,12 +105,14 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
                 points.push_back(new1);
                 points.push_back(new2);
                 points.push_back(new3);
+                pointIdx = -1;
             }
             else if (key->code == sf::Keyboard::Key::Hyphen) {
                 if (len > 6) {
                     points.pop_back();
                     points.pop_back();
                     points.pop_back();
+                    pointIdx = -1;
                 }
             }
         }
@@ -127,13 +130,17 @@ void render(sf::RenderWindow& window) {
     if (time >= FPS_LIMIT) time = 0;
 
     float t = 0;
-    sf::VertexArray line(sf::PrimitiveType::LineStrip, FPS_LIMIT + 1);
-    for (int i = 0; i <= FPS_LIMIT; ++i) {
-        t = static_cast<float>(i) / FPS_LIMIT;
-        line[i].position = getPoint(points, t);
-        line[i].color = sf::Color::Blue;
+    int groupCount = (points.size() - 1) / 3;
+    for (int l = 0; l < groupCount; ++l) {
+        std::vector<Point2D> group = {points[l*3], points[l*3 + 1], points[l*3 + 2], points[l*3 + 3]};
+        sf::VertexArray line(sf::PrimitiveType::LineStrip, FPS_LIMIT + 1);
+        for (int i = 0; i <= FPS_LIMIT; ++i) {
+            t = static_cast<float>(i) / FPS_LIMIT;
+            line[i].position = getPoint(group, t);
+            line[i].color = sf::Color::Blue;
+        }
+        window.draw(line);
     }
-    window.draw(line);
 
     for (int i = 0; i < points.size(); ++i) {
         sf::CircleShape circle(10.f);
@@ -147,8 +154,9 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 2) Draw a small square moving repeatedly along the curve.
     // Use GetSlope to orient it to the curve at each time step.
     // ====== ====== ======
-    Point2D position = getPoint(points, t2);
-    Point2D slope = getSlope(points, t2);
+    std::vector<Point2D> group1 = {points[0], points[1], points[2], points[3]};
+    Point2D position = getPoint(group1, t2);
+    Point2D slope = getSlope(group1, t2);
 
     sf::RectangleShape square({10.f, 10.f});
     square.setOrigin({5.f, 5.f});
@@ -164,19 +172,23 @@ void render(sf::RenderWindow& window) {
     // ====== ====== ======
 
     // https://www.sfml-dev.org/tutorials/3.0/graphics/shape/#lines
-    std::array line1 =
-    {
-        sf::Vertex{points[0]},
-        sf::Vertex{points[1]}
-    };
-    std::array line2 =
-    {
-        sf::Vertex{points[2]},
-        sf::Vertex{points[3]}
-    };
+    for (int i = 0; i < groupCount; ++i) {
+        int temp = i * 3;
+        std::array line1 =
+        {
+            sf::Vertex{points[temp]},
+            sf::Vertex{points[temp + 1]}
+        };
+        std::array line2 =
+        {
+            sf::Vertex{points[temp+ 2]},
+            sf::Vertex{points[temp+ 3]}
+        };
+    
+        window.draw(line1.data(), line1.size(), sf::PrimitiveType::Lines);
+        window.draw(line2.data(), line1.size(), sf::PrimitiveType::Lines);
+    }
 
-    window.draw(line1.data(), line1.size(), sf::PrimitiveType::Lines);
-    window.draw(line2.data(), line1.size(), sf::PrimitiveType::Lines);
 
     // ====== ====== ======
     // TODO: (Bonus) Support multiple curves, a Galaga screen overlay at a 1:2 ratio, and exporting
