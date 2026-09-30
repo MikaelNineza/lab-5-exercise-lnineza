@@ -90,6 +90,26 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
         } else if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
             // TODO: (Part 4) '+' adds three control points; '-' removes three,
             // keeping at least four points.
+            int len = points.size();
+            if (key->code == sf::Keyboard::Key::Add || key->code == sf::Keyboard::Key::Equal) {
+                Point2D endPoint = points[len - 1];
+                Point2D direction = endPoint - points[len - 2];
+                
+                Point2D new1 = endPoint + direction * 1.2f;
+                Point2D new2 = endPoint + direction * 1.4f;
+                Point2D new3 = endPoint + direction * 1.6f;
+
+                points.push_back(new1);
+                points.push_back(new2);
+                points.push_back(new3);
+            }
+            else if (key->code == sf::Keyboard::Key::Hyphen) {
+                if (len > 6) {
+                    points.pop_back();
+                    points.pop_back();
+                    points.pop_back();
+                }
+            }
         }
     }
 }
