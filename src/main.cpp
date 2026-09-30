@@ -94,10 +94,12 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
             if (key->code == sf::Keyboard::Key::Add || key->code == sf::Keyboard::Key::Equal) {
                 Point2D endPoint = points[len - 1];
                 Point2D direction = endPoint - points[len - 2];
-                
-                Point2D new1 = endPoint + direction * 1.2f;
-                Point2D new2 = endPoint + direction * 1.4f;
-                Point2D new3 = endPoint + direction * 1.6f;
+
+                direction /= direction.length();
+
+                Point2D new1 = endPoint + direction * 25.f;
+                Point2D new2 = endPoint + direction * 50.f;
+                Point2D new3 = endPoint + direction * 75.f;
 
                 points.push_back(new1);
                 points.push_back(new2);
@@ -149,7 +151,7 @@ void render(sf::RenderWindow& window) {
     Point2D slope = getSlope(points, t2);
 
     sf::RectangleShape square({10.f, 10.f});
-    square.setOrigin({10.f, 10.f});
+    square.setOrigin({5.f, 5.f});
     // https://www.sfml-dev.org/tutorials/3.0/graphics/transform/#rotation
     square.setRotation(sf::radians(std::atan2(slope.y, slope.x)));
     square.setPosition(position);
